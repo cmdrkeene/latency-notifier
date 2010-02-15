@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 HOST = "google.com"
 PING_COUNT = 10
-LATENCY_THRESHOLD = 0 # 500 # in milliseconds
-PACKET_LOSS_THRESHOLD = 0 # 20 # in percent
+LATENCY_THRESHOLD = 500 # in milliseconds
+PACKET_LOSS_THRESHOLD = 20 # in percent
 
 class LatencyNotifier
   def initialize(host)
@@ -16,11 +16,11 @@ class LatencyNotifier
     packet_loss, latency = analyze(ping(@host))
     puts "Packet Loss: #{packet_loss}%"
     puts "Latency: #{packet_loss}ms"
-    # if packet_loss > PACKET_LOSS_THRESHOLD
+    if packet_loss >= PACKET_LOSS_THRESHOLD
       alert "Packet loss to #{@host} is #{packet_loss}% (> #{PACKET_LOSS_THRESHOLD}%)"
-    # elsif latency > LATENCY_THRESHOLD
+    elsif latency >= LATENCY_THRESHOLD
       alert "Latency to #{@host} is #{latency}ms (> #{LATENCY_THRESHOLD}ms)"
-    # end
+    end
   end
 
   private
@@ -46,14 +46,14 @@ class LatencyNotifier
   end
 
   def tweet(message)
-    %x{tweetlog "[latency-notifer] #{message}"}
+    %x{tweetlog "#{message}"}
   end
 
   def growl(message)
-    application       = 'latency-notifier'
+    application       = "Latency Notifier"
     icon_application  = 'Network Utility'
-
     growl_command = "growlnotify -a '#{icon_application}' -n '#{application}' -t '#{application}' -m '#{message}' -p 'Emergency'"
+    system(growl_command)
   end
 end
 
