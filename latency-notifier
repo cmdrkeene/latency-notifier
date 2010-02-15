@@ -16,11 +16,11 @@ class LatencyNotifier
     packet_loss, latency = analyze(ping(@host))
     puts "Packet Loss: #{packet_loss}%"
     puts "Latency: #{packet_loss}ms"
-    if packet_loss > PACKET_LOSS_THRESHOLD
+    # if packet_loss > PACKET_LOSS_THRESHOLD
       alert "Packet loss to #{@host} is #{packet_loss}% (> #{PACKET_LOSS_THRESHOLD}%)"
-    elsif latency > LATENCY_THRESHOLD
+    # elsif latency > LATENCY_THRESHOLD
       alert "Latency to #{@host} is #{latency}ms (> #{LATENCY_THRESHOLD}ms)"
-    end
+    # end
   end
 
   private
