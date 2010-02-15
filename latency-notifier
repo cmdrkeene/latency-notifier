@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+HOST = "google.com"
+PING_COUNT = 10
+LATENCY_THRESHOLD = 500 # in milliseconds
+PACKET_LOSS_THRESHOLD = 20 # in percent
+
+class LatencyNotifier
+  def initialize(host)
+    @host = host
+  end
+
+  # Ping host, tweet if:
+  # - Packet loss exceeds threshold
+  # - Average latency exceeds threshold
+  def probe
+    packet_loss, latency = analyze(ping(@host))
+    if packet_loss > PACKET_LOSS_THRESHOLD
+      alert "Packet loss to #{@host} is #{packet_loss}%!"
+    elsif latency > LATENCY_THRESHOLD
+      alert "Latency to #{@host} is #{latency}ms!"
+    end
+  end
+
+  private
+
+  def ping
+    %x{"ping -q -c #{PING_COUNT}"}
+  end
+
+  # PING google.com (72.14.204.147): 56 data bytes
+  #
+  # --- google.com ping statistics ---
+  # 2 packets transmitted, 2 packets received, 0.0% packet loss
+  # round-trip min/avg/max/stddev = 21.264/22.755/24.247/1.492 ms
+  def analyze(ping_data)
+    packet_loss = ping_data.scan(/(\d+\.\d+)%/).first.to_f
+    latency  = ping_data.scan(/\d+\.\d+/)[1].to_f
+    [packet_loss, latency]
+  end
+
+  def alert(message)
+    tweet(message)
+    growl(message)
+  end
+
+  def tweet(message)
+    %x{tweetlog "[latency-notifer] #{message}"}
+  end
+
+  def growl(message)
+    application       = 'latency-notifier'
+    icon_application  = 'Network Utility'
+
+    growl_command = "growlnotify -a '#{icon_application}' -n '#{application}' -t '#{application}' -m '#{message}' -p 'Emergency'"
+  end
+end
+
+LatencyNotifier.new(HOST).probe
