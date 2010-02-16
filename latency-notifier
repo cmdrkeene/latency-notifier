@@ -15,7 +15,7 @@ class LatencyNotifier
   def probe
     packet_loss, latency = analyze(ping(@host))
     puts "Packet Loss: #{packet_loss}%"
-    puts "Latency: #{packet_loss}ms"
+    puts "Latency: #{latency}ms"
     if packet_loss >= PACKET_LOSS_THRESHOLD
       alert "Packet loss to #{@host} is #{packet_loss}% (> #{PACKET_LOSS_THRESHOLD}%)"
     elsif latency >= LATENCY_THRESHOLD
